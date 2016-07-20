@@ -58,7 +58,7 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
   
   // MARK: Time Travel
   func getSupportedTimeTravelDirectionsForComplication(complication: CLKComplication, withHandler handler: (CLKComplicationTimeTravelDirections) -> Void) {
-    handler(.None)
+    handler([.Forward, .Backward])
   }
 
   // MARK: Template Creation
