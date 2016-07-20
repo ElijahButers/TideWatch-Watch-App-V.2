@@ -106,4 +106,15 @@ extension ComplicationController {
     let docPath = paths.first!
     return (docPath as NSString).stringByAppendingPathComponent("CurrentStation")
   }
+  
+  func getTimelineStartDateForComplication(complication: CLKComplication, withHandler handler: (NSDate?) -> Void) {
+    
+    let tideConditions = TideConditions.loadConditions()
+    guard let waterLevel = tideConditions.waterLevels.first else {
+      //
+      handler(nil)
+      return
+    }
+    handler(waterLevel.date)
+  }
 }
