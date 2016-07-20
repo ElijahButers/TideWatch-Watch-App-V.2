@@ -1,0 +1,109 @@
+/*
+* Copyright (c) 2015 Razeware LLC
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in
+* all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+* THE SOFTWARE.
+*/
+
+import ClockKit
+
+final class ComplicationController: NSObject, CLKComplicationDataSource {
+  
+  // MARK: Register
+  func getPlaceholderTemplateForComplication(complication: CLKComplication, withHandler handler: (CLKComplicationTemplate?) -> Void) {
+    if complication.family == .UtilitarianSmall {
+      let smallFlat = CLKComplicationTemplateUtilitarianSmallFlat()
+      smallFlat.textProvider = CLKSimpleTextProvider(text: "+2.6m")
+      smallFlat.imageProvider = nil // CLKImageProvider(backgroundImage: UIImage(named: "tide_high")!, backgroundColor: nil)
+      
+      handler(smallFlat)
+    }
+    else if complication.family == .UtilitarianLarge {
+      let largeFlat = CLKComplicationTemplateUtilitarianLargeFlat()
+      largeFlat.textProvider = CLKSimpleTextProvider(text: "Rising, +2.6m", shortText:"+2.6m")
+      largeFlat.imageProvider = nil // CLKImageProvider(backgroundImage: UIImage(named: "tide_high")!, backgroundColor: nil)
+      
+      handler(largeFlat)
+    }
+  }
+  
+  // MARK: Provide Data
+  func getCurrentTimelineEntryForComplication(complication: CLKComplication, withHandler handler: (CLKComplicationTimelineEntry?) -> Void) {
+    let tideConditions = TideConditions.loadConditions()
+    
+    guard let waterLevel = tideConditions.currentWaterLevel else {
+      // No data is cached yet
+      handler(nil)
+      return
+    }
+    
+    handler(timelineEntryFor(waterLevel, family: complication.family))
+    saveDisplayedStation(tideConditions.station)
+  }
+  
+  // MARK: Time Travel
+  func getSupportedTimeTravelDirectionsForComplication(complication: CLKComplication, withHandler handler: (CLKComplicationTimeTravelDirections) -> Void) {
+    handler(.None)
+  }
+
+  // MARK: Template Creation
+  func timelineEntryFor(waterLevel: WaterLevel, family: CLKComplicationFamily) -> CLKComplicationTimelineEntry? {
+    let tideImageName: String
+    switch waterLevel.situation {
+    case .High: tideImageName = "tide_high"
+    case .Low: tideImageName = "tide_low"
+    case .Rising: tideImageName = "tide_rising"
+    case .Falling: tideImageName = "tide_falling"
+    default: tideImageName = "tide_high"
+    }
+    
+    if family == .UtilitarianSmall {
+      let smallFlat = CLKComplicationTemplateUtilitarianSmallFlat()
+      smallFlat.textProvider = CLKSimpleTextProvider(text: waterLevel.shortTextForComplication)
+      smallFlat.imageProvider = CLKImageProvider(onePieceImage: UIImage(named: tideImageName)!)
+      return CLKComplicationTimelineEntry(date: waterLevel.date, complicationTemplate: smallFlat)
+    } else if family == .UtilitarianLarge{
+      let largeFlat = CLKComplicationTemplateUtilitarianLargeFlat()
+      largeFlat.textProvider = CLKSimpleTextProvider(text: waterLevel.longTextForComplication, shortText:waterLevel.shortTextForComplication)
+      largeFlat.imageProvider = CLKImageProvider(onePieceImage: UIImage(named: tideImageName)!)
+      return CLKComplicationTimelineEntry(date: waterLevel.date, complicationTemplate: largeFlat)
+    }
+    return nil
+  }
+}
+
+// MARK: Displayed Data
+extension ComplicationController {
+  private func loadDisplayedStation() -> MeasurementStation? {
+    if let data = NSData(contentsOfFile: storePath) {
+      let station = NSKeyedUnarchiver.unarchiveObjectWithData(data) as! MeasurementStation
+      return station
+    }
+    return nil
+  }
+  
+  private func saveDisplayedStation(displayedStation: MeasurementStation) {
+    NSKeyedArchiver.archiveRootObject(displayedStation, toFile: storePath)
+  }
+  
+  private var storePath: String {
+    let paths = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)
+    let docPath = paths.first!
+    return (docPath as NSString).stringByAppendingPathComponent("CurrentStation")
+  }
+}
