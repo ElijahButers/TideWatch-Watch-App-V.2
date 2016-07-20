@@ -117,4 +117,15 @@ extension ComplicationController {
     }
     handler(waterLevel.date)
   }
+  
+  func getTimelineEndDateForComplication(complication: CLKComplication, withHandler handler: (NSDate?) -> Void) {
+    
+    let tideConditions = TideConditions.loadConditions()
+    guard let waterLevel = tideConditions.waterLevels.last else {
+      //
+      handler(nil)
+      return
+    }
+    handler(waterLevel.date)
+  }
 }
