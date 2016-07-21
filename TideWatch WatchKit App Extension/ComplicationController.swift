@@ -76,12 +76,12 @@ final class ComplicationController: NSObject, CLKComplicationDataSource {
       let smallFlat = CLKComplicationTemplateUtilitarianSmallFlat()
       smallFlat.textProvider = CLKSimpleTextProvider(text: waterLevel.shortTextForComplication)
       smallFlat.imageProvider = CLKImageProvider(onePieceImage: UIImage(named: tideImageName)!)
-      return CLKComplicationTimelineEntry(date: waterLevel.date, complicationTemplate: smallFlat)
+      return CLKComplicationTimelineEntry(date: waterLevel.date, complicationTemplate: smallFlat, timelineAnimationGroup: waterLevel.situation.rawValue)
     } else if family == .UtilitarianLarge{
       let largeFlat = CLKComplicationTemplateUtilitarianLargeFlat()
       largeFlat.textProvider = CLKSimpleTextProvider(text: waterLevel.longTextForComplication, shortText:waterLevel.shortTextForComplication)
       largeFlat.imageProvider = CLKImageProvider(onePieceImage: UIImage(named: tideImageName)!)
-      return CLKComplicationTimelineEntry(date: waterLevel.date, complicationTemplate: largeFlat)
+      return CLKComplicationTimelineEntry(date: waterLevel.date, complicationTemplate: largeFlat, timelineAnimationGroup: waterLevel.situation.rawValue)
     }
     return nil
   }
