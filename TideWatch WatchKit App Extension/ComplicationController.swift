@@ -166,4 +166,8 @@ extension ComplicationController {
     handler(entries)
   }
 
+  func getTimelineAnimationBehaviorForComplication(complication: CLKComplication, withHandler handler: (CLKComplicationTimelineAnimationBehavior) -> Void) {
+    
+    handler(.Grouped)
+  }
 }
