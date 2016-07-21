@@ -128,4 +128,23 @@ extension ComplicationController {
     }
     handler(waterLevel.date)
   }
+  
+  func getTimelineEntriesForComplication(complication: CLKComplication, beforeDate date: NSDate, limit: Int, withHandler handler: ([CLKComplicationTimelineEntry]?) -> Void) {
+    
+    let tideConditions = TideConditions.loadConditions()
+    
+    var waterLevels = tideConditions.waterLevels.filter {
+      $0.date.compare(date) == .OrderedAscending
+    }
+    
+    if waterLevels.count > limit {
+      let numberToRemove = waterLevels.count - limit
+      waterLevels.removeRange(0..<numberToRemove)
+    }
+    
+    let entries = waterLevels.flatMap { waterLevel in
+      return timelineEntryFor(waterLevel, family: complication.family)
+  }
+    handler(entries)
+  }
 }
