@@ -179,6 +179,30 @@ extension ComplicationController {
     } else {
       handler(NSDate())
     }
+  }
+  
+  func reloadOrExtendData() {
     
+    let server = CLKComplicationServer.sharedInstance()
+    guard let complications = server.activeComplications
+      where complications.count > 0 else { return }
+    
+    let tideConditions = TideConditions.loadConditions()
+    let displayedStation = loadDisplayedStation()
+    
+    if let id = displayedStation?.id
+      where id == tideConditions.station.id {
+      
+      if tideConditions.waterLevels.last?.date.compare(server.latestTimeTravelDate) == .OrderedDescending {
+        for complication in complications {
+          server.extendTimelineForComplication(complication)
+        }
+      }
+    } else {
+      for complication in complications {
+        server.reloadTimelineForComplication(complication)
+      }
+    }
+    saveDisplayedStation(tideConditions.station)
   }
 }
