@@ -170,4 +170,15 @@ extension ComplicationController {
     
     handler(.Grouped)
   }
+  
+  func getNextRequestedUpdateDateWithHandler(handler: (NSDate?) -> Void) {
+    
+    let tideConditions = TideConditions.loadConditions()
+    if let waterLevel = tideConditions.waterLevels.last {
+      handler(waterLevel.date)
+    } else {
+      handler(NSDate())
+    }
+    
+  }
 }
