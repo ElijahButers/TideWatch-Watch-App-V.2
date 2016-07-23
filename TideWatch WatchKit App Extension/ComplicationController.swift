@@ -205,4 +205,17 @@ extension ComplicationController {
     }
     saveDisplayedStation(tideConditions.station)
   }
+  
+  func refreshData() {
+    
+    let tideConditions = TideConditions.loadConditions()
+    let yesterday = NSDate(timeIntervalSinceNow: -24 * 60 * 60)
+    let tomorrow = NSDate(timeIntervalSinceNow: 24 * 60 * 60)
+    tideConditions.loadWaterLevels(from: yesterday, to: tomorrow) { success in
+      if success {
+        TideConditions.saveConditions(tideConditions)
+          self.reloadOrExtendData()
+      }
+    }
+  }
 }
