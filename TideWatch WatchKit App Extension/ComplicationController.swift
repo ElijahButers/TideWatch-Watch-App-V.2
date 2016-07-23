@@ -218,4 +218,12 @@ extension ComplicationController {
       }
     }
   }
+  
+  func requestedUpdateDidBegin() {
+    refreshData()
+  }
+  
+  func requestedUpdateBudgetExhausted() {
+    refreshData()
+  }
 }
