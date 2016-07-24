@@ -51,12 +51,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WCSessionDelegate {
       let session = WCSession.defaultSession()
       if session.watchAppInstalled,
         let conditions = notification.userInfo?["conditions"] as? TideConditions,
-        let _ = notification.userInfo?["newStation"]?.boolValue
+        let isNewStation = notification.userInfo?["newStation"]?.boolValue
       {
         do {
           let data = NSKeyedArchiver.archivedDataWithRootObject(conditions)
           let dictionary = ["data": data]
-          try session.updateApplicationContext(dictionary)
+          // Transferr complication info
+          if isNewStation {
+            session.transferCurrentComplicationUserInfo(dictionary)
+          } else {
+            try session.updateApplicationContext(dictionary)
+          }
         } catch {
           print("ERROR: \(error)")
         }
