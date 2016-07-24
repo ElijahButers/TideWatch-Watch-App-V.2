@@ -82,4 +82,13 @@ class ExtensionDelegate: NSObject, WKExtensionDelegate, WCSessionDelegate {
       notificationCenter.postNotificationName(PhoneUpdatedDataNotification, object: tideConditions)
     }
   }
+  
+  func session(session: WCSession, didReceiveUserInfo userInfo: [String : AnyObject]) {
+    
+    if let data = userInfo["data"] as? NSData {
+      if let tideConditions = NSKeyedUnarchiver.unarchiveObjectWithData(data) as? TideConditions {
+        conditionsUpdated(tideConditions)
+      }
+    }
+  }
 }
