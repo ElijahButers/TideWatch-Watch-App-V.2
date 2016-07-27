@@ -226,4 +226,9 @@ extension ComplicationController {
   func requestedUpdateBudgetExhausted() {
     refreshData()
   }
+  
+  func getPrivacyBehaviorForComplication(complication: CLKComplication, withHandler handler: (CLKComplicationPrivacyBehavior) -> Void) {
+    
+    handler(.HideOnLockScreen)
+  }
 }
